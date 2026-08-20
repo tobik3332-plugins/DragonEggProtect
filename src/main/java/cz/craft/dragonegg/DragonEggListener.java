@@ -61,7 +61,7 @@ public class DragonEggListener implements Listener {
             plugin.removePlacedEgg(event.getBlock().getLocation());
         }
         if (event.getTo() == Material.DRAGON_EGG) {
-            plugin.addPlacedEgg(event.getBlock().getLocation());
+            plugin.addPlacedEgg(event.getToBlock().getLocation());
         }
     }
 
