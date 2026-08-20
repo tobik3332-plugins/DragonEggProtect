@@ -34,7 +34,7 @@ public class DragonEggTask extends BukkitRunnable {
         if (team == null) {
             team = board.registerNewTeam("DragonEggGlow");
         }
-        
+
         String colorStr = plugin.getConfig().getString("glow-effect.color", "LIGHT_PURPLE");
         try {
             ChatColor color = ChatColor.valueOf(colorStr.toUpperCase());
@@ -42,7 +42,7 @@ public class DragonEggTask extends BukkitRunnable {
         } catch (Exception e) {
             team.setColor(ChatColor.LIGHT_PURPLE);
         }
-        
+
         this.glowTeam = team;
     }
 
@@ -61,8 +61,6 @@ public class DragonEggTask extends BukkitRunnable {
             for (World world : Bukkit.getWorlds()) {
                 for (Item item : world.getEntitiesByClass(Item.class)) {
                     if (item.getItemStack().getType() == Material.DRAGON_EGG) {
-                        item.setUnlimitedLifetime(true);
-
                         if (item.getLocation().getY() <= triggerY) {
                             if (targetWorld != null) {
                                 Location targetLoc = new Location(targetWorld, tx, ty, tz);
