@@ -1,0 +1,47 @@
+# ========================================================
+#       DragonEggProtect - Konfigurace Pluginu
+# ========================================================
+
+# Teleportace vajíčka z Voidu / pod určitou Y úroveň
+void-teleport:
+  enabled: true
+  # Při jaké Y souřadnici a nižší se má vajíčko teleportovat
+  trigger-y: -70.0
+  # Cílová pozice pro teleportaci (funguje ve všech světech včetně Multiverse-Core)
+  target-world: "spawn"
+  target-x: 0.5
+  target-y: 100.0
+  target-z: 0.5
+  # Oznámení pro hráče po zachránění vajíčka z voidu
+  broadcast: true
+  broadcast-message: "<gradient:#ff5555:#ffaa00>[DragonEgg]</gradient> <yellow>Dračí vajíčko spadlo do voidu a bylo bezpečně teleportováno na spawn!"
+
+# Glow efekt pro hráče nesoucího vajíčko v inventáři
+glow-effect:
+  enabled: true
+  # Barva svícení (PINK, PURPLE, RED, GOLD, YELLOW, GREEN, AQUA, BLUE, WHITE, LIGHT_PURPLE)
+  color: "LIGHT_PURPLE"
+  # Částice kolem hráče (END_ROD, DRAGON_BREATH, SPELL_WITCH, FLAME, NONE)
+  particles: "END_ROD"
+
+# Imunita dropnutého předmětu (vajíčka) proti poškození
+item-protection:
+  prevent-despawn: true # Vajíčko nikdy nezmizí ze země
+  prevent-cactus: true  # Neshoří o kaktus
+  prevent-fire: true    # Neshoří v ohni ani lávě
+  prevent-explosion: true # Nezničí ho výbuch (Creeper, TNT)
+
+# Ochrana před ukládáním do zakázaných truhlic/kontejnerů
+container-protection:
+  enabled: true
+  deny-message: "<red>Dračí vajíčko nemůžeš vložit do tohoto kontejneru! Je povoleno pouze v klasické truhle."
+
+# Zprávy
+messages:
+  prefix: "<gradient:#ff5555:#ffaa00>[DragonEgg]</gradient> "
+  no-permission: "<red>Nemáš oprávnění k tomuto příkazu!"
+  reload-success: "<green>Konfigurace byla úspěšně znovu načtena!"
+  tracking-player: "<yellow>Dračí vajíčko má u sebe hráč: <gold>{player} <gray>(Svět: {world}, X: {x}, Y: {y}, Z: {z})"
+  tracking-item: "<yellow>Dračí vajíčko leží na zemi na pozici: <gray>Svět: {world}, X: {x}, Y: {y}, Z: {z}"
+  tracking-chest: "<yellow>Dračí vajíčko je schované v truhle na pozici: <gray>Svět: {world}, X: {x}, Y: {y}, Z: {z}"
+  tracking-not-found: "<red>Dračí vajíčko nebylo nikde na serveru nalezeno!"
