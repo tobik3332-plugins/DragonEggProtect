@@ -6,8 +6,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -48,7 +50,7 @@ public class DragonEggTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        // 1. Kontrola Void Teleportace ze všech světů
+        // 1. Kontrola Void Teleportace ze všech světů (Itemy i Padající bloky)
         if (plugin.getConfig().getBoolean("void-teleport.enabled", true)) {
             double triggerY = plugin.getConfig().getDouble("void-teleport.trigger-y", -70.0);
             String targetWorldName = plugin.getConfig().getString("void-teleport.target-world", "spawn");
@@ -59,6 +61,7 @@ public class DragonEggTask extends BukkitRunnable {
             World targetWorld = Bukkit.getWorld(targetWorldName);
 
             for (World world : Bukkit.getWorlds()) {
+                // Kontrola Itemů ve voidu
                 for (Item item : world.getEntitiesByClass(Item.class)) {
                     if (item.getItemStack().getType() == Material.DRAGON_EGG) {
                         if (item.getLocation().getY() <= triggerY) {
@@ -71,8 +74,25 @@ public class DragonEggTask extends BukkitRunnable {
                                     String msg = plugin.getConfig().getString("void-teleport.broadcast-message");
                                     Bukkit.broadcast(ColorUtils.parse(msg));
                                 }
-                            } else {
-                                plugin.getLogger().warning("Svet '" + targetWorldName + "' nebylo mozne najit pro teleportaci draciho vajicka!");
+                            }
+                        }
+                    }
+                }
+
+                // Kontrola Padajících bloků (FallingBlock) ve voidu
+                for (FallingBlock fb : world.getEntitiesByClass(FallingBlock.class)) {
+                    if (fb.getBlockData().getMaterial() == Material.DRAGON_EGG) {
+                        if (fb.getLocation().getY() <= triggerY) {
+                            if (targetWorld != null) {
+                                Location targetLoc = new Location(targetWorld, tx, ty, tz);
+                                fb.remove();
+                                Item dropped = targetWorld.dropItem(targetLoc, new ItemStack(Material.DRAGON_EGG));
+                                dropped.setVelocity(new Vector(0, 0, 0));
+
+                                if (plugin.getConfig().getBoolean("void-teleport.broadcast", true)) {
+                                    String msg = plugin.getConfig().getString("void-teleport.broadcast-message");
+                                    Bukkit.broadcast(ColorUtils.parse(msg));
+                                }
                             }
                         }
                     }
