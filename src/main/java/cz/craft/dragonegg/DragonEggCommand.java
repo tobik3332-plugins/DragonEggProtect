@@ -13,6 +13,8 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DragonEggCommand extends Command {
@@ -53,6 +55,31 @@ public class DragonEggCommand extends Command {
         return true;
     }
 
+    @Override
+    public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
+        if (args.length == 1) {
+            List<String> completions = new ArrayList<>();
+            List<String> commands = new ArrayList<>();
+
+            if (sender.hasPermission("dragonegg.where")) {
+                commands.add("where");
+                commands.add("track");
+                commands.add("kde");
+            }
+            if (sender.hasPermission("dragonegg.reload")) {
+                commands.add("reload");
+            }
+
+            for (String cmd : commands) {
+                if (cmd.toLowerCase().startsWith(args[0].toLowerCase())) {
+                    completions.add(cmd);
+                }
+            }
+            return completions;
+        }
+        return Collections.emptyList();
+    }
+
     private void findEggLocation(CommandSender sender) {
         String prefix = plugin.getConfig().getString("messages.prefix");
 
@@ -71,7 +98,7 @@ public class DragonEggCommand extends Command {
             }
         }
 
-        // 2. Kontrola na zemi ve všech světech
+        // 2. Kontrola na zemi jako item ve všech světech
         for (World world : Bukkit.getWorlds()) {
             for (Item item : world.getEntitiesByClass(Item.class)) {
                 if (item.getItemStack().getType() == Material.DRAGON_EGG) {
@@ -87,7 +114,7 @@ public class DragonEggCommand extends Command {
             }
         }
 
-        // 3. Kontrola v načtených truhlách (správné prohledávání načtených chunků)
+        // 3. Kontrola v načtených truhlách
         for (World world : Bukkit.getWorlds()) {
             for (Chunk chunk : world.getLoadedChunks()) {
                 for (BlockState tile : chunk.getTileEntities()) {
@@ -105,6 +132,19 @@ public class DragonEggCommand extends Command {
                     }
                 }
             }
+        }
+
+        // 4. Kontrola položeného bloku
+        List<Location> placedEggs = plugin.getPlacedEggs();
+        if (!placedEggs.isEmpty()) {
+            Location loc = placedEggs.get(0);
+            String msg = plugin.getConfig().getString("messages.tracking-block", "")
+                    .replace("{world}", loc.getWorld().getName())
+                    .replace("{x}", String.valueOf(loc.getBlockX()))
+                    .replace("{y}", String.valueOf(loc.getBlockY()))
+                    .replace("{z}", String.valueOf(loc.getBlockZ()));
+            sender.sendMessage(ColorUtils.parse(prefix + msg));
+            return;
         }
 
         sender.sendMessage(ColorUtils.parse(prefix + plugin.getConfig().getString("messages.tracking-not-found")));
