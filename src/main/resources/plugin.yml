@@ -1,0 +1,17 @@
+name: DragonEggProtect
+version: '1.0.0'
+main: cz.craft.dragonegg.DragonEggPlugin
+api-version: '1.20'
+author: Craft
+description: Complete Dragon Egg protection, void teleportation, tracking and glow effects.
+permissions:
+  dragonegg.use:
+    default: true
+  dragonegg.where:
+    default: op
+  dragonegg.reload:
+    default: op
+  dragonegg.bypass:
+    default: op
+  dragonegg.effects:
+    default: true
