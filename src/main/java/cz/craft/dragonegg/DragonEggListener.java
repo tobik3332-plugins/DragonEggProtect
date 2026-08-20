@@ -7,12 +7,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class DragonEggListener implements Listener {
@@ -22,6 +28,55 @@ public class DragonEggListener implements Listener {
     public DragonEggListener(DragonEggPlugin plugin) {
         this.plugin = plugin;
     }
+
+    // ========== SLEDOVÁNÍ A TELEPORTACE BLOKU ==========
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        if (event.getBlockPlaced().getType() == Material.DRAGON_EGG) {
+            plugin.addPlacedEgg(event.getBlockPlaced().getLocation());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (event.getBlock().getType() == Material.DRAGON_EGG) {
+            plugin.removePlacedEgg(event.getBlock().getLocation());
+        }
+    }
+
+    // Zachytí odskočení (teleport) vajíčka po kliknutí hráče
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockFromTo(BlockFromToEvent event) {
+        if (event.getBlock().getType() == Material.DRAGON_EGG) {
+            plugin.removePlacedEgg(event.getBlock().getLocation());
+            plugin.addPlacedEgg(event.getToBlock().getLocation());
+        }
+    }
+
+    // Zachytí změnu na FallingBlock (když vajíčko padá) nebo dopad bloku
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockChange(EntityChangeBlockEvent event) {
+        if (event.getBlock().getType() == Material.DRAGON_EGG && event.getTo() == Material.AIR) {
+            plugin.removePlacedEgg(event.getBlock().getLocation());
+        }
+        if (event.getTo() == Material.DRAGON_EGG) {
+            plugin.addPlacedEgg(event.getBlock().getLocation());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInteract(PlayerInteractEvent event) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.DRAGON_EGG) {
+                if (plugin.getConfig().getBoolean("block-protection.prevent-teleport", false)) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    // ========== OCHRANA ITEMŮ A TRUHEL ==========
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemDamage(EntityDamageEvent event) {
