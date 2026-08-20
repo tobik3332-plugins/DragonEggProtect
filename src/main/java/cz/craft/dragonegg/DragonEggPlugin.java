@@ -65,12 +65,24 @@ public class DragonEggPlugin extends JavaPlugin {
             if (parts.length == 4) {
                 World w = Bukkit.getWorld(parts[0]);
                 if (w != null) {
-                    Location loc = new Location(w, Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Integer.parseInt(parts[3]));
-                    if (loc.getBlock().getType() == Material.DRAGON_EGG) {
-                        locs.add(loc);
+                    int x = Integer.parseInt(parts[1]);
+                    int y = Integer.parseInt(parts[2]);
+                    int z = Integer.parseInt(parts[3]);
+                    Location loc = new Location(w, x, y, z);
+
+                    int chunkX = x >> 4;
+                    int chunkZ = z >> 4;
+
+                    // Pokud je chunk načtený, ověříme blok. Pokud načtený není, lokaci nemažeme!
+                    if (w.isChunkLoaded(chunkX, chunkZ)) {
+                        if (loc.getBlock().getType() == Material.DRAGON_EGG) {
+                            locs.add(loc);
+                        } else {
+                            list.remove(s);
+                            changed = true;
+                        }
                     } else {
-                        list.remove(s);
-                        changed = true;
+                        locs.add(loc);
                     }
                 }
             }
