@@ -1,6 +1,7 @@
 package cz.craft.dragonegg;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -86,19 +87,21 @@ public class DragonEggCommand extends Command {
             }
         }
 
-        // 3. Kontrola v načtených truhlách
+        // 3. Kontrola v načtených truhlách (správné prohledávání načtených chunků)
         for (World world : Bukkit.getWorlds()) {
-            for (BlockState tile : world.getLoadedTileEntities()) {
-                if (tile instanceof Container container) {
-                    if (container.getInventory().contains(Material.DRAGON_EGG)) {
-                        Location loc = container.getLocation();
-                        String msg = plugin.getConfig().getString("messages.tracking-chest", "")
-                                .replace("{world}", world.getName())
-                                .replace("{x}", String.valueOf(loc.getBlockX()))
-                                .replace("{y}", String.valueOf(loc.getBlockY()))
-                                .replace("{z}", String.valueOf(loc.getBlockZ()));
-                        sender.sendMessage(ColorUtils.parse(prefix + msg));
-                        return;
+            for (Chunk chunk : world.getLoadedChunks()) {
+                for (BlockState tile : chunk.getTileEntities()) {
+                    if (tile instanceof Container container) {
+                        if (container.getInventory().contains(Material.DRAGON_EGG)) {
+                            Location loc = container.getLocation();
+                            String msg = plugin.getConfig().getString("messages.tracking-chest", "")
+                                    .replace("{world}", world.getName())
+                                    .replace("{x}", String.valueOf(loc.getBlockX()))
+                                    .replace("{y}", String.valueOf(loc.getBlockY()))
+                                    .replace("{z}", String.valueOf(loc.getBlockZ()));
+                            sender.sendMessage(ColorUtils.parse(prefix + msg));
+                            return;
+                        }
                     }
                 }
             }
