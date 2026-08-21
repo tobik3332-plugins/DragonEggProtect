@@ -50,9 +50,9 @@ public class DragonEggTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        // 1. Kontrola Void Teleportace ze všech světů (Itemy i Padající bloky)
+        // 1. Kontrola Void Teleportace ze všech světů
         if (plugin.getConfig().getBoolean("void-teleport.enabled", true)) {
-            double triggerY = plugin.getConfig().getDouble("void-teleport.trigger-y", -70.0);
+            double configTriggerY = plugin.getConfig().getDouble("void-teleport.trigger-y", -70.0);
             String targetWorldName = plugin.getConfig().getString("void-teleport.target-world", "spawn");
             double tx = plugin.getConfig().getDouble("void-teleport.target-x", 0.5);
             double ty = plugin.getConfig().getDouble("void-teleport.target-y", 100.0);
@@ -61,14 +61,20 @@ public class DragonEggTask extends BukkitRunnable {
             World targetWorld = Bukkit.getWorld(targetWorldName);
 
             for (World world : Bukkit.getWorlds()) {
+                double safeVoidY = world.getMinHeight() - 20; 
+                double triggerY = Math.max(configTriggerY, safeVoidY);
+
                 // Kontrola Itemů ve voidu
-                for (Item item : world.getEntitiesByClass(Item.class)) {
-                    if (item.getItemStack().getType() == Material.DRAGON_EGG) {
+                for (Item item : new HashSet<>(world.getEntitiesByClass(Item.class))) {
+                    if (item.isValid() && item.getItemStack().getType() == Material.DRAGON_EGG) {
                         if (item.getLocation().getY() <= triggerY) {
                             if (targetWorld != null) {
                                 Location targetLoc = new Location(targetWorld, tx, ty, tz);
-                                item.teleport(targetLoc);
-                                item.setVelocity(new Vector(0, 0, 0));
+                                ItemStack stack = item.getItemStack().clone();
+                                item.remove();
+
+                                Item newItem = targetWorld.dropItem(targetLoc, stack);
+                                newItem.setVelocity(new Vector(0, 0, 0));
 
                                 if (plugin.getConfig().getBoolean("void-teleport.broadcast", true)) {
                                     String msg = plugin.getConfig().getString("void-teleport.broadcast-message");
@@ -80,14 +86,15 @@ public class DragonEggTask extends BukkitRunnable {
                 }
 
                 // Kontrola Padajících bloků (FallingBlock) ve voidu
-                for (FallingBlock fb : world.getEntitiesByClass(FallingBlock.class)) {
-                    if (fb.getBlockData().getMaterial() == Material.DRAGON_EGG) {
+                for (FallingBlock fb : new HashSet<>(world.getEntitiesByClass(FallingBlock.class))) {
+                    if (fb.isValid() && fb.getBlockData().getMaterial() == Material.DRAGON_EGG) {
                         if (fb.getLocation().getY() <= triggerY) {
                             if (targetWorld != null) {
                                 Location targetLoc = new Location(targetWorld, tx, ty, tz);
                                 fb.remove();
-                                Item dropped = targetWorld.dropItem(targetLoc, new ItemStack(Material.DRAGON_EGG));
-                                dropped.setVelocity(new Vector(0, 0, 0));
+
+                                Item newItem = targetWorld.dropItem(targetLoc, new ItemStack(Material.DRAGON_EGG));
+                                newItem.setVelocity(new Vector(0, 0, 0));
 
                                 if (plugin.getConfig().getBoolean("void-teleport.broadcast", true)) {
                                     String msg = plugin.getConfig().getString("void-teleport.broadcast-message");
