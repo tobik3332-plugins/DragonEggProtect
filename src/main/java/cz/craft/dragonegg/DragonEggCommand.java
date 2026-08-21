@@ -41,7 +41,7 @@ public class DragonEggCommand extends Command {
             return true;
         }
 
-        if (args.length > 0 && (args[0].equalsIgnoreCase("where") || args[0].equalsIgnoreCase("track") || args[0].equalsIgnoreCase("kde"))) {
+        if (args.length > 0 && (args[0].equalsIgnoreCase("where") || args[0].equalsIgnoreCase("track"))) {
             if (!sender.hasPermission("dragonegg.where")) {
                 sender.sendMessage(ColorUtils.parse(plugin.getConfig().getString("messages.prefix") + plugin.getConfig().getString("messages.no-permission")));
                 return true;
@@ -64,7 +64,6 @@ public class DragonEggCommand extends Command {
             if (sender.hasPermission("dragonegg.where")) {
                 commands.add("where");
                 commands.add("track");
-                commands.add("kde");
             }
             if (sender.hasPermission("dragonegg.reload")) {
                 commands.add("reload");
